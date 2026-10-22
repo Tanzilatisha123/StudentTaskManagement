@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-task-manager
+  labels:
+    app: student-task-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: student-task-manager
+  template:
+    metadata:
+      labels:
+        app: student-task-manager
+    spec:
+      containers:
+        - name: flask-app
+          image: tanzila123/student-task-manager:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5

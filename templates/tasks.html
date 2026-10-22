@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Task Manager</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-icon">✓</span> TaskFlow</div>
+    <nav class="nav">
+      <div class="nav-label">Menu</div>
+      <a href="/" class="">🏠 Dashboard</a>
+      <a href="/tasks" class="on">📋 My Tasks</a>
+      <a href="/add" class="">➕ Add Task</a>
+    </nav>
+    <div class="sidebar-foot">Student Task Manager</div>
+  </aside>
+  <main class="content">
+    {% with msgs = get_flashed_messages(with_categories=true) %}{% for c, m in msgs %}<div class="flash {{ c }}">{{ m }}</div>{% endfor %}{% endwith %}
+    <div class="page-head">
+      <div><h1>My Tasks</h1><p>Everything you need to finish, in one place.</p></div>
+      <a class="btn" href="/add">+ New Task</a>
+    </div>
+    <div class="panel">
+      <table>
+        <thead>
+          <tr><th>Task</th><th>Subject</th><th>Priority</th><th>Due date</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for t in tasks %}
+          <tr class="{{ 'done' if t.done }}">
+            <td class="t-title">{{ t.title }}</td>
+            <td>{{ t.subject }}</td>
+            <td><span class="badge {{ t.priority }}">{{ t.priority }}</span></td>
+            <td>{{ t.due_date or '—' }}</td>
+            <td>{% if t.done %}<span class="badge s-done">Completed</span>{% else %}<span class="badge s-wait">Pending</span>{% endif %}</td>
+            <td class="act">
+              {% if not t.done %}<a class="ok" href="{{ url_for('complete', task_id=t.id) }}">Complete</a>{% endif %}
+              <a class="del" href="{{ url_for('delete', task_id=t.id) }}">Delete</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="empty">No tasks yet. <a href="/add">Add your first task</a>.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>

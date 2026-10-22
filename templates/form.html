@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Task Manager</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-icon">✓</span> TaskFlow</div>
+    <nav class="nav">
+      <div class="nav-label">Menu</div>
+      <a href="/" class="">🏠 Dashboard</a>
+      <a href="/tasks" class="">📋 My Tasks</a>
+      <a href="/add" class="on">➕ Add Task</a>
+    </nav>
+    <div class="sidebar-foot">Student Task Manager</div>
+  </aside>
+  <main class="content">
+    {% with msgs = get_flashed_messages(with_categories=true) %}{% for c, m in msgs %}<div class="flash {{ c }}">{{ m }}</div>{% endfor %}{% endwith %}
+    <div class="page-head">
+      <div><h1>Add Task</h1><p>Create a new assignment or study goal.</p></div>
+    </div>
+    <form method="post" class="panel panel-pad form-card">
+      <div class="form-grid">
+        <div class="field full">
+          <label for="title">Task title</label>
+          <input id="title" name="title" required placeholder="e.g. Finish DevOps case study">
+        </div>
+        <div class="field">
+          <label for="subject">Subject</label>
+          <input id="subject" name="subject" required placeholder="e.g. DevOps">
+        </div>
+        <div class="field">
+          <label for="priority">Priority</label>
+          <select id="priority" name="priority">
+            <option>Low</option><option selected>Medium</option><option>High</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="due_date">Due date</label>
+          <input id="due_date" type="date" name="due_date">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="submit">Save task</button>
+        <a class="link-muted" href="/tasks">Cancel</a>
+      </div>
+    </form>
+  </main>
+</div>
+</body>
+</html>
