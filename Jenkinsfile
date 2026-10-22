@@ -41,16 +41,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+                stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    powershell '''
-                        (Get-Content deployment.yaml) -replace 'IMAGE_TAG', $env:IMAGE_TAG | Set-Content deployment.yaml
-                        kubectl apply -f deployment.yaml
-                        kubectl apply -f service.yaml
-                        kubectl rollout status deployment/student-task-manager --timeout=120s
-                    '''
-                }
+                powershell '''
+                    (Get-Content deployment.yaml) -replace 'IMAGE_TAG', $env:IMAGE_TAG | Set-Content deployment.yaml
+                    kubectl apply -f deployment.yaml
+                    kubectl apply -f service.yaml
+                    kubectl rollout status deployment/student-task-manager --timeout=120s
+                '''
             }
         }
     }
