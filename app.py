@@ -1,7 +1,11 @@
 import os
 import sqlite3
 from datetime import date
-from flask import Flask, render_template, request, redirect, url_for, flash
+from functools import wraps
+
+from flask import (Flask, render_template, request, redirect,
+                   url_for, flash, session)
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
@@ -22,10 +26,60 @@ def db():
             due_date TEXT,
             done INTEGER NOT NULL DEFAULT 0)"""
     )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS users(
+            name TEXT PRIMARY KEY,
+            password_hash TEXT NOT NULL)"""
+    )
     return conn
 
 
+def login_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if "user" not in session:
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
+    return wrapped
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if "user" in session:
+        return redirect(url_for("home"))
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        password = request.form.get("password", "")
+        if not name or len(password) < 4:
+            flash("Enter your name and a password of at least 4 characters.", "error")
+            return redirect(url_for("login"))
+        conn = db()
+        row = conn.execute("SELECT * FROM users WHERE name=?", (name,)).fetchone()
+        if row is None:
+            # first login creates the account
+            conn.execute("INSERT INTO users(name, password_hash) VALUES(?,?)",
+                         (name, generate_password_hash(password)))
+            conn.commit()
+        elif not check_password_hash(row["password_hash"], password):
+            conn.close()
+            flash("Incorrect password for this name.", "error")
+            return redirect(url_for("login"))
+        conn.close()
+        session["user"] = name
+        flash(f"Welcome, {name}!", "success")
+        return redirect(url_for("home"))
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been logged out.", "success")
+    return redirect(url_for("login"))
+
+
 @app.route("/")
+@login_required
 def home():
     conn = db()
     total = conn.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
@@ -40,6 +94,7 @@ def home():
 
 
 @app.route("/add", methods=["GET", "POST"])
+@login_required
 def add_task():
     if request.method == "POST":
         title = request.form.get("title", "").strip()
@@ -61,6 +116,7 @@ def add_task():
 
 
 @app.route("/tasks")
+@login_required
 def tasks():
     conn = db()
     rows = conn.execute("SELECT * FROM tasks ORDER BY done, due_date").fetchall()
@@ -69,6 +125,7 @@ def tasks():
 
 
 @app.route("/complete/<int:task_id>")
+@login_required
 def complete(task_id):
     conn = db()
     conn.execute("UPDATE tasks SET done=1 WHERE id=?", (task_id,))
@@ -78,6 +135,7 @@ def complete(task_id):
 
 
 @app.route("/delete/<int:task_id>")
+@login_required
 def delete(task_id):
     conn = db()
     conn.execute("DELETE FROM tasks WHERE id=?", (task_id,))
@@ -88,6 +146,7 @@ def delete(task_id):
 
 @app.route("/health")
 def health():
+    # public on purpose: used by the Kubernetes readiness probe
     return {"status": "ok"}
 
 

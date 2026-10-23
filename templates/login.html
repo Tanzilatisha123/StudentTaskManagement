@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login | Student Task Manager</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+  <div class="login-box">
+    <div class="login-brand"><span class="brand-icon">✓</span> TaskFlow</div>
+    <h1>Sign in</h1>
+    <p class="login-sub">Enter your name and password to open your task manager.</p>
+    {% with msgs = get_flashed_messages(with_categories=true) %}{% for c, m in msgs %}<div class="flash {{ c }}">{{ m }}</div>{% endfor %}{% endwith %}
+    <form method="post">
+      <div class="field">
+        <label for="name">Your name</label>
+        <input id="name" name="name" required autofocus placeholder="e.g. Tanzila">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" required placeholder="At least 4 characters">
+      </div>
+      <button class="btn login-btn" type="submit">Login</button>
+    </form>
+    <p class="login-note">New here? Just enter a name and choose a password. Your account is created on first login.</p>
+  </div>
+</body>
+</html>

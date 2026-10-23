@@ -16,7 +16,9 @@
       <a href="/tasks" class="">📋 My Tasks</a>
       <a href="/add" class="">➕ Add Task</a>
     </nav>
-    <div class="sidebar-foot">Student Task Manager</div>
+    <div class="sidebar-foot">
+      {% if session.get('user') %}<div class="user-chip">👤 {{ session['user'] }}</div><a class="logout" href="/logout">Logout</a>{% endif %}
+    </div>
   </aside>
   <main class="content">
     {% with msgs = get_flashed_messages(with_categories=true) %}{% for c, m in msgs %}<div class="flash {{ c }}">{{ m }}</div>{% endfor %}{% endwith %}
@@ -31,7 +33,7 @@
       <div class="stat overdue"><div class="stat-icon">⚠️</div><div><b>{{ overdue }}</b><span>Overdue</span></div></div>
     </div>
     <div class="panel panel-pad welcome">
-      <h2>Welcome back 👋</h2>
+      <h2>Welcome, {{ session['user'] }}! 👋</h2>
       <p>Plan your assignments, track deadlines and stay on top of your studies.</p>
       <a class="btn" href="/tasks">View all tasks</a>
     </div>

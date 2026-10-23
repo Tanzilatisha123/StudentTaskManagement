@@ -16,7 +16,9 @@
       <a href="/tasks" class="">📋 My Tasks</a>
       <a href="/add" class="on">➕ Add Task</a>
     </nav>
-    <div class="sidebar-foot">Student Task Manager</div>
+    <div class="sidebar-foot">
+      {% if session.get('user') %}<div class="user-chip">👤 {{ session['user'] }}</div><a class="logout" href="/logout">Logout</a>{% endif %}
+    </div>
   </aside>
   <main class="content">
     {% with msgs = get_flashed_messages(with_categories=true) %}{% for c, m in msgs %}<div class="flash {{ c }}">{{ m }}</div>{% endfor %}{% endwith %}
